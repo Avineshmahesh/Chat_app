@@ -18,7 +18,7 @@ const AppContextProvider = (props) => {
             const userData = userSnap.data();
             setUserData(userData);
             // need to use Avatar in the if condition...................
-            if(userData.name){
+            if(userData.avatar && userData.name){
                 navigate('/chat');
             }
             else{

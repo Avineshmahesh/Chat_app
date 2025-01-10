@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../../config/firebase';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
+import upload from '../../lib/upload';
 
 const ProfileUpdate = () => {
   const navigate = useNavigate();
@@ -14,17 +15,32 @@ const ProfileUpdate = () => {
   const [image,setImage] = useState(false);
   const [name,setName] = useState("");
   const [bio,setBio] = useState("");
+  const [prevImage,setPrevImage] = useState("");
   const [uid,setUid] = useState("");
   const {setUserData} = useContext(AppContext)
 
   const profileUpdate = async (event) =>{
     event.preventDefault();
     try{
+      if(!prevImage && !image){
+        toast.error("Upload profile picture")
+      }
       const docRef = doc(db,'users',uid);
-      await updateDoc(docRef,{
-        name:name,
-        bio:bio
-      })
+      if(image){
+        const imgUrl = await upload(image);
+        setPrevImage(imgUrl);
+        await updateDoc(docRef,{
+          avatar:imgUrl,
+          name:name,
+          bio:bio
+        })
+      }
+      else{
+        await updateDoc(docRef,{
+          name:name,
+          bio:bio
+        })
+      }
       const snap = await getDoc(docRef);
       setUserData(snap.data());
       navigate('/chat');
